@@ -4,7 +4,7 @@ This is for some tests to see what kind of spots (if any) can explain the weirdl
 
 The method loosely follows that from Rackham papers (transit light source), with some special considerations for M dwarfs and young stars.
 
-This will assume:
-<br>-pristine transit cord
-<br>-dark spots (hot spots won't help, although a mix might)
-<br>-Spots are stable over the observing window. This probably isn't true, but it is clear that the overall spot pattern is stable form the K2 curve and out-of-transit monitoring. 
+This will assume:<br/>
+-pristine transit cord<br />
+-dark spots (hot spots won't help, although a mix might)<br />
+-Spots are stable over the observing window. This probably isn't true, but it is clear that the overall spot pattern is stable form the K2 curve and out-of-transit monitoring. 
