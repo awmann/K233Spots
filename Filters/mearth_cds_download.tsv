@@ -1,0 +1,68 @@
+#
+#   VizieR Astronomical Server vizier.u-strasbg.fr
+#    Date: 2020-02-26T18:37:57 [V1.99+ (14-Oct-2013)]
+#   In case of problem, please report to:	cds-question@unistra.fr
+#
+#
+#Coosys	J2000:	eq_FK5 J2000
+#INFO	votable-version=1.99+ (14-Oct-2013)	
+#INFO	-ref=VIZ5e56badc1e2f	
+#INFO	-out.max=unlimited	
+#INFO	queryParameters=7	
+#-oc.form=dec
+#-out.max=unlimited
+#-nav=cat:J/ApJ/818/153&tab:{J/ApJ/818/153/table1}&key:source=J/ApJ/818/153/table1&HTTPPRM:&
+#-source=J/ApJ/818/153/table1
+#-order=I
+#-out=lambda
+#-out=Prod
+#
+
+#RESOURCE=yCat_18180153
+#Name: J/ApJ/818/153
+#Title: MEarth photometry: nearby M-dwarf magnitudes (Dittmann+, 2016)
+#Table	J_ApJ_818_153_table1:
+#Name: J/ApJ/818/153/table1
+#Title: Quantum Efficiency (QE) of the MEarth CCD, and filter throughput
+#Column	lambda	(I4)	[650/1000] Wavelength of filter (nanometer)	[ucd=em.wl;instr.filter]
+#Column	Prod	(F6.3)	[0/0.8] Product	[ucd=phys.transmission;instr.filter]
+lambda;Prod
+nm;
+----;------
+ 650; 0.000
+ 660; 0.000
+ 670; 0.000
+ 680; 0.000
+ 690; 0.005
+ 700; 0.051
+ 710; 0.267
+ 720; 0.563
+ 730; 0.720
+ 740; 0.768
+ 750; 0.774
+ 760; 0.764
+ 770; 0.748
+ 780; 0.730
+ 790; 0.711
+ 800; 0.688
+ 810; 0.665
+ 820; 0.641
+ 830; 0.615
+ 840; 0.588
+ 850; 0.559
+ 860; 0.530
+ 870; 0.500
+ 880; 0.469
+ 890; 0.440
+ 900; 0.410
+ 910; 0.382
+ 920; 0.354
+ 930; 0.327
+ 940; 0.300
+ 950; 0.274
+ 960; 0.248
+ 970; 0.222
+ 980; 0.197
+ 990; 0.172
+1000; 0.147
+
