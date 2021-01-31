@@ -1,5 +1,6 @@
 # K233Spots
 
+TransitLightSource:
 This is for some tests to see what kind of spots (if any) can explain the weirdly shallow transits we are getting from HST and Spitzer compared to the MEarth and K2 data from K2-33.
 This was meant for K2-33b, but should be generalizable with some edits
 
@@ -9,3 +10,7 @@ This will assume:<br/>
 -pristine transit cord<br />
 -dark spots (hot spots won't help, although a mix might)<br />
 -Spots are stable over the observing window. This probably isn't true, but it is clear that the overall spot pattern is stable form the K2 curve and out-of-transit monitoring. 
+
+
+multi_spec_fit:
+This is meant to tell us what kind of spot temperatures and coverage fractions are allowed by the spectrum. If you combine two 
