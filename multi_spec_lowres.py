@@ -1,15 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# This code is to fit a spectrum as the sum of two atmosphere models (a spot and a surface).
-
-# To do:
-# <br /> -Masking out bad regions a la Mann+2013
-# <br /> -Testing just NIR data
-# <br /> -Additional flux calibration corrections?
-
-# In[1]:
-
 
 from astropy.modeling import models
 from astropy.coordinates import SkyCoord
@@ -72,7 +63,7 @@ plt.rcParams['axes.titlesize'] = 9
 # In[3]:
 
 
-#whoami = 'mannaw'
+whoami = 'mannaw'
 #whoami = 'andrewmann'
 
 
@@ -155,7 +146,7 @@ def ln_likelihood(theta, modelteff, modelspectra, wav, obsspec, obstype, obserr 
     tmp = np.sort(p)
     #print(tmp)
     #print(tmp[int(np.round(np.size(tmp)*0.01)):np.size(tmp)])
-    output = np.sum(np.log(tmp[int(np.round(np.size(tmp)*0.01)):np.size(tmp)]))
+    output = np.sum(np.log(tmp[int(np.round(np.size(tmp)*0.012)):np.size(tmp)]))
     #output = np.sum(np.log(p[20:np.size(modelspec_norm)-20]))
     return output
 
@@ -308,22 +299,32 @@ for num in nums:
 
     ## read in data
     obswav,obsspec,obserr,obstype = np.loadtxt('rawspec.txt',unpack=True,skiprows=1)
-
+    obserr[np.where(obstype == 3)] = 1.25*np.array(obserr[np.where(obstype == 3)])
+#     plt.plot(obswav,obsspec)
+#     l1 = np.where(obstype == 1)
+#     plt.plot(obswav[l1],obsspec[l1])
+#     l2 = np.where(obstype == 2)
+#     plt.plot(obswav[l2],obsspec[l2])
+#     l3 = np.where(obstype == 3)
+#     plt.plot(obswav[l3],obsspec[l3])
+#     plt.xlim(4000,20000)
+#     plt.tight_layout()
+#     plt.show()
 
     ## this trims the bad region of the SpeX data (noisy)
-    l4 = np.where((obswav > 4000) & (obswav<24000) & ((obswav > 8000)|(obstype<3)) & (obsspec > 0))
-    opticalspec = obsspec[l4]
-    opticalwav = obswav[l4]
-    opticalerr = obserr[l4]
-    l5 = np.where((obswav > 4000) & (obswav<23500) & (obsspec/obserr > 10))
+    #l4 = np.where((obswav > 4000) & (obswav<24000) & ((obswav > 8000)|(obstype<3)) & (obsspec > 0))
+    #opticalspec = obsspec[l4]
+    #opticalwav = obswav[l4]
+    #opticalerr = obserr[l4]
+    l5 = np.where((obswav > 4200) & (obswav<23500) & (obsspec/obserr > 10))
     if mask_optical: ## if we want to cut the annoying region around 6300-6600
-        l5 = np.where((obswav > 4000) & (obswav<23500) & (obsspec/obserr > 15) & ((obswav > 6600)|(obswav<6350)) & ((obswav > 6153)|(obswav<6056)) & ((obswav > 7025)|(obswav<6915)) & ((obswav > 7580)|(obswav<7700))   )
+        l5 = np.where((obswav > 4200) & (obswav<23500) & (obsspec/obserr > 10) & ((obswav > 6600)|(obswav<6350)) & ((obswav > 6153)|(obswav<6056)) & ((obswav > 7025)|(obswav<6915)) & ((obswav > 7580)|(obswav<7700))   )
     if nir_only:
         l5 = np.where((obstype == 3)&(obswav<23500))
     if optical_only:
-        l5 = np.where((obstype < 3)&(obswav > 4000))
+        l5 = np.where((obstype < 3)&(obswav > 4200))
     if optical_only & mask_optical:
-        l5 = np.where((obstype<3) & (obswav > 4000) & (obswav<23500) & (obsspec/obserr > 15) & ((obswav > 6600)|(obswav<6350)) & ((obswav > 6153)|(obswav<6056)) & ((obswav > 7025)|(obswav<6915)) & ((obswav > 7580)|(obswav<7700))   )
+        l5 = np.where((obstype<3) & (obswav > 4200) & (obswav<23500) & (obsspec/obserr > 10) & ((obswav > 6600)|(obswav<6350)) & ((obswav > 6153)|(obswav<6056)) & ((obswav > 7025)|(obswav<6915)) & ((obswav > 7580)|(obswav<7700))   )
 
     ## uncomment this when you want to run the fit without that nasty region in the optical
 
@@ -331,6 +332,13 @@ for num in nums:
     obswav_cut = np.array(obswav[l5])
     obserr_cut = np.array(obserr[l5])
     obstype_cut = np.array(obstype[l5])
+
+#     plt.scatter(obswav_cut,obsspec_cut,marker='.')
+#     plt.tight_layout
+#     plt.xlim(np.min(obswav_cut),np.max(obswav_cut))
+#     plt.ylim(0.1,3)
+#     plt.xscale('log')
+#     plt.show()
 
     if modtype == 'k233':
         modelpath = '/Users/'+whoami+'/Dropbox/Radii/Models_K233_Feb2020.fits'
@@ -459,8 +467,10 @@ for num in nums:
         sampler = emcee.EnsembleSampler(nwalkers, ndim, ln_posteriorNIR, args=(mteff,mspec,mwav,ospec,oerr), backend=backend, threads=12)
         sampler.run_mcmc(pos0, nsteps,progress=True)
     if (not nir_only) & (not optical_only):
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, ln_posterior, args=(mteff,mspec,mwav,ospec,otype,oerr), backend=backend, threads=12)
-        sampler.run_mcmc(pos0, nsteps,progress=True)
+        with Pool() as pool:
+            sampler = emcee.EnsembleSampler(nwalkers, ndim, ln_posterior, args=(mteff,mspec,mwav,ospec,otype,oerr), backend=backend, pool=pool)
+            #sampler = emcee.EnsembleSampler(nwalkers, ndim, log_prob, pool=pool)
+            sampler.run_mcmc(pos0, nsteps,progress=True)
     if optical_only:
         sampler = emcee.EnsembleSampler(nwalkers, ndim, ln_posteriorOPT, args=(mteff,mspec,mwav,ospec,otype,oerr), backend=backend, threads=12)
         sampler.run_mcmc(pos0, nsteps,progress=True)
@@ -473,6 +483,20 @@ for num in nums:
         labels = [r'$T_{\rm{surf}}$ (K)',r'$T_{\rm{spot}}$ (K)',r'$f_S$ (%)',r'$a$','$A_V$',r'$\lambda_{\rm{off}}$ ($\AA$)',r'$\sigma_f$ (%)']
     if optical_only:
         labels = [r'$T_{\rm{surf}}$ (K)',r'$T_{\rm{spot}}$ (K)',r'$f_S$ (%)',r'$a$',r'$b$','$A_V$',r'$\lambda_{\rm{off}}$ ($\AA$)',r'$\sigma_f$ (%)']
+
+
+    fig, axes = plt.subplots(ndim, figsize=(10, 7), sharex=True)
+    samples = sampler.get_chain(discard=burn)
+    for i in range(ndim):
+        ax = axes[i]
+        ax.plot(samples[:, :, i], "k", alpha=0.3)
+        ax.set_xlim(0, len(samples))
+        ax.set_ylabel(labels[i])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
+
+    axes[-1].set_xlabel("step number");
+    plt.show()
+    #plt.savefig('Walkers_specfit'+str(num)+'.pdf')
 
 
 
@@ -493,6 +517,7 @@ for num in nums:
         hist_kwargs={"linewidth": 2.5},levels=[(1-np.exp(-0.5)),(1-np.exp(-2)),(1-np.exp(-4.5))]
     );
 
+    #plt.show()
     plt.savefig('Lowres_corner'+str(num)+'.pdf')
 
 
@@ -509,6 +534,7 @@ for num in nums:
         hist_kwargs={"linewidth": 2.5},levels=[(1-np.exp(-0.5)),(1-np.exp(-2)),(1-np.exp(-4.5))]
     );
 
+    #plt.show()
     plt.savefig('Lowres_corner_trim'+str(num)+'.pdf')
     flat = np.array(sampler.get_chain(discard=burn, thin=thin, flat=True))
 
@@ -550,6 +576,7 @@ for num in nums:
     if (not nir_only) & (not optical_only):
         Tsurf, Tspot, fS, a1, b1, c1, a2, b2, c2, AV, loff, f = best
 
+    plt.show()
     plt.clf()
     modelspec = doublespec(mteff,modelspectra,Tsurf,Tspot,fS)
     newwav = wav + loff
@@ -570,9 +597,11 @@ for num in nums:
         plt.xlim(7000,23500)
         plt.savefig('lowres_bestfit'+num+'.pdf')
 
+        plt.show()
         plt.clf()
         plt.plot(wav,(obsspec_norm-modelspec_norm)/obsspec_err_norm)
         plt.xlim(7000,23500)
+        plt.show()
         plt.savefig('lowres_bestfit'+str(num)+'.pdf')
 
     if (optical_only):
@@ -586,6 +615,7 @@ for num in nums:
         plt.xlim(5000,9000)
         plt.savefig('lowres_bestfit'+str(num)+'.pdf')
 
+        plt.show()
         plt.clf()
         plt.plot(wav,(obsspec_norm-modelspec_norm)/obsspec_err_norm)
         plt.xlim(5000,9000)#6050-6175
@@ -614,6 +644,7 @@ for num in nums:
         plt.xlim(5000,23000)
         plt.savefig('lowres_bestfit'+str(num)+'.pdf')
 
+        plt.show()
         plt.clf()
         plt.plot(wav,(obsspec_norm-modelspec_norm)/obsspec_err_norm)
         plt.xlim(5000,23000)#6050-6175
